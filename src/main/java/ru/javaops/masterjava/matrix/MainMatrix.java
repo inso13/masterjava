@@ -24,18 +24,25 @@ public class MainMatrix {
         while (count < 6) {
             System.out.println("Pass " + count);
             long start = System.currentTimeMillis();
-            final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
+           final int[][] matrixC = MatrixUtil.singleThreadMultiplyUnoptimized(matrixA, matrixB);
             double duration = (System.currentTimeMillis() - start) / 1000.;
             out("Single thread time, sec: %.3f", duration);
             singleThreadSum += duration;
 
             start = System.currentTimeMillis();
+            final int[][] optimizedMatrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
+            duration = (System.currentTimeMillis() - start) / 1000.;
+            out("Single thread time optimized, sec: %.3f", duration);
+            singleThreadSum += duration;
+
+            start = System.currentTimeMillis();
             final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply(matrixA, matrixB, executor);
+
             duration = (System.currentTimeMillis() - start) / 1000.;
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
 
-            if (!MatrixUtil.compare(matrixC, concurrentMatrixC)) {
+            if (!MatrixUtil.compare(optimizedMatrixC, concurrentMatrixC)) {
                 System.err.println("Comparison failed");
                 break;
             }

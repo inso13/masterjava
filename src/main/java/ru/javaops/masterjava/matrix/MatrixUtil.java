@@ -1,5 +1,7 @@
 package ru.javaops.masterjava.matrix;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -16,29 +18,15 @@ public class MatrixUtil {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
         final int threadCount = 10;
-        class MultiplyArrays extends Thread {
+        int area = matrixA.length / threadCount;
+        List<Thread> threads = new ArrayList<>();
+        for (int i = 0; i < threadCount; i++) {
+            int begin = i * area;
+            int end = ((i + 1) * area);
 
-            private int[][] m1, m2;
-            private int begin, end;
-
-
-            public MultiplyArrays(int[][] m1, int[][] m2, int begin, int end) {
-                this.m1 = m1;
-                this.m2 = m2;
-                this.begin = begin;
-                this.end = end;
-            }
-
+        executor.submit(new Runnable() {
+            @Override
             public void run() {
-                /*for (int i = begin; i < end; i++) {
-                    for (int j = 0; j < m2[0].length; j++) {
-                        int sum = 0;
-                        for (int r = 0; r < m2.length; r++) {
-                            sum = sum + m1[i][r] * m2[r][j];
-                        }
-                        matrixC[i][j] = sum;
-                    }
-                }*/
                 final int aColumns = matrixA.length;
                 final int aRows = matrixA[0].length;
                 final int bColumns = matrixB.length;
@@ -63,25 +51,16 @@ public class MatrixUtil {
                     }
                 } catch (IndexOutOfBoundsException ignored) { }
             }
-        }
-        int area = matrixA.length / threadCount;
-        MultiplyArrays[] multiplyArrayses = new MultiplyArrays[threadCount];
-        for (int i = 0; i < threadCount; i++) {
-            multiplyArrayses[i] = new MultiplyArrays(matrixA,matrixB, i * area, (i + 1) * area);
-            multiplyArrayses[i].start();
-        }
-
-        for (MultiplyArrays multiplyArrays : multiplyArrayses) {
-            multiplyArrays.join();
-        }
+        }); }
         return matrixC;
     }
 
     // TODO optimize by https://habrahabr.ru/post/114797/
-    public static int[][] singleThreadMultiply(int[][] matrixA, int[][] matrixB) {
+
+    public static int[][] singleThreadMultiplyUnoptimized(int[][] matrixA, int[][] matrixB) {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
-/*
+
         for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
                 int sum = 0;
@@ -91,7 +70,11 @@ public class MatrixUtil {
                 matrixC[i][j] = sum;
             }
         }
-        return matrixC;*/
+        return matrixC;}
+
+    public static int[][] singleThreadMultiply(int[][] matrixA, int[][] matrixB) {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
         final int aColumns = matrixA.length;
         final int aRows = matrixA[0].length;
         final int bColumns = matrixB.length;
