@@ -10,19 +10,30 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 03.07.2016
  */
 public class MatrixUtil {
-    static class MultiplierThread extends Thread
-    {
-        /** Первая (левая) матрица. */
+    static class MultiplierThread extends Thread {
+        /**
+         * Первая (левая) матрица.
+         */
         private final int[][] firstMatrix;
-        /** Вторая (правая) матрица. */
+        /**
+         * Вторая (правая) матрица.
+         */
         private final int[][] secondMatrix;
-        /** Результирующая матрица. */
+        /**
+         * Результирующая матрица.
+         */
         private final int[][] resultMatrix;
-        /** Начальный индекс. */
+        /**
+         * Начальный индекс.
+         */
         private final int firstIndex;
-        /** Конечный индекс. */
+        /**
+         * Конечный индекс.
+         */
         private final int lastIndex;
-        /** Число членов суммы при вычислении значения ячейки. */
+        /**
+         * Число членов суммы при вычислении значения ячейки.
+         */
         private final int sumLength;
 
         /**
@@ -36,47 +47,66 @@ public class MatrixUtil {
                                 final int[][] secondMatrix,
                                 final int[][] resultMatrix,
                                 final int firstIndex,
-                                final int lastIndex)
-        {
-            this.firstMatrix  = firstMatrix;
+                                final int lastIndex) {
+            this.firstMatrix = firstMatrix;
             this.secondMatrix = secondMatrix;
             this.resultMatrix = resultMatrix;
-            this.firstIndex   = firstIndex;
-            this.lastIndex    = lastIndex;
+            this.firstIndex = firstIndex;
+            this.lastIndex = lastIndex;
 
             sumLength = secondMatrix.length;
         }
 
-        /**Вычисление значения в одной ячейке.
+        /**
+         * Вычисление значения в одной ячейке.
          *
          * @param row Номер строки ячейки.
          * @param col Номер столбца ячейки.
          */
-        private void calcValue(final int row, final int col)
-        {
+        private void calcValue(final int row, final int col) {
             int sum = 0;
             for (int i = 0; i < sumLength; ++i)
                 sum += firstMatrix[row][i] * secondMatrix[i][col];
             resultMatrix[row][col] = sum;
         }
 
-        /** Рабочая функция потока. */
+        /**
+         * Рабочая функция потока.
+         */
         @Override
-        public void run()
-        {
-           // System.out.println("Thread " + getName() + " started. Calculating cells from " + firstIndex + " to " + lastIndex + "...");
+        public void run() {
+         // System.out.println("Thread " + getName() + " started. Calculating cells from " + firstIndex + " to " + lastIndex + "...");
 
-            final int colCount = secondMatrix[0].length;  // Число столбцов результирующей матрицы.
-            for (int index = firstIndex; index < lastIndex; ++index)
-                calcValue(index / colCount, index % colCount);
+            final int aColumns = firstMatrix.length;
+            final int aRows = firstMatrix[0].length;
+            final int bColumns = secondMatrix.length;
+            final int bRows = secondMatrix[0].length;
 
+            int thatColumn[] = new int[bRows];
+
+            try {
+                for (int j = 0; ; j++) {
+                    for (int k = 0; k < aColumns; k++) {
+                        thatColumn[k] = secondMatrix[k][j];
+                    }
+
+                    for (int i = 0; i < aRows; i++) {
+                        int thisRow[] = firstMatrix[i];
+                        int summand = 0;
+                        for (int k = 0; k < aColumns; k++) {
+                            summand += thisRow[k] * thatColumn[k];
+                        }
+                        resultMatrix[i][j] = summand;
+                    }
+                }
+            } catch (IndexOutOfBoundsException ignored) { }
            // System.out.println("Thread " + getName() + " finished.");
         }
     }
 
     // TODO implement parallel multiplication matrixA*matrixB
     public static int[][] concurrentMultiply(int[][] firstMatrix, int[][] secondMatrix, ExecutorService executor) throws InterruptedException, ExecutionException {
-        int threadCount = 10;
+        final int threadCount = 10;
 
         final int rowCount = firstMatrix.length;             // Число строк результирующей матрицы.
         final int colCount = secondMatrix[0].length;         // Число столбцов результирующей матрицы.
