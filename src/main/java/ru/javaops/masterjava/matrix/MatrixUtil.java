@@ -3,8 +3,10 @@ package ru.javaops.masterjava.matrix;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * gkislin
@@ -12,14 +14,13 @@ import java.util.concurrent.ExecutorService;
  */
 public class MatrixUtil {
 
-    // TODO implement parallel multiplication matrixA*matrixB
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
 
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
-        final int threadCount = 10;
-        int area = matrixA.length / threadCount;
-        List<Thread> threads = new ArrayList<>();
+        final int threadCount = ((ThreadPoolExecutor) executor).getCorePoolSize();
+        final int area = matrixA.length / threadCount;
+        CountDownLatch latch = new CountDownLatch(threadCount);
         for (int i = 0; i < threadCount; i++) {
             int begin = i * area;
             int end = ((i + 1) * area);
@@ -31,7 +32,6 @@ public class MatrixUtil {
                 final int aRows = matrixA[0].length;
                 final int bColumns = matrixB.length;
                 final int bRows = matrixB[0].length;
-
                 int thatColumn[] = new int[bRows];
 
                 try {
@@ -39,23 +39,30 @@ public class MatrixUtil {
                         for (int k = 0; k < aColumns; k++) {
                             thatColumn[k] = matrixB[k][j];
                         }
-
-                        for (int i = 0; i < aRows; i++) {
-                            int thisRow[] = matrixA[i];
-                            int summand = 0;
-                            for (int k = 0; k < aColumns; k++) {
-                                summand += thisRow[k] * thatColumn[k];
-                            }
-                            matrixC[i][j] = summand;
-                        }
+                        calc(aColumns, aRows, thatColumn, j, matrixA, matrixC);
                     }
                 } catch (IndexOutOfBoundsException ignored) { }
+                finally {
+                    latch.countDown();}
             }
-        }); }
+        });}
+        try {
+            latch.await();
+        } catch (InterruptedException e) {//handle
+            }
         return matrixC;
     }
 
-    // TODO optimize by https://habrahabr.ru/post/114797/
+    private static void calc(int aColumns, int aRows, int[] thatColumn, int j, int[][] matrixA, int[][] matrixC) {
+        for (int i = 0; i < aRows; i++) {
+            int thisRow[] = matrixA[i];
+            int summand = 0;
+            for (int k = 0; k < aColumns; k++) {
+                summand += thisRow[k] * thatColumn[k];
+            }
+            matrixC[i][j] = summand;
+        }
+    }
 
     public static int[][] singleThreadMultiplyUnoptimized(int[][] matrixA, int[][] matrixB) {
         final int matrixSize = matrixA.length;
@@ -88,14 +95,7 @@ public class MatrixUtil {
                     thatColumn[k] = matrixB[k][j];
                 }
 
-                for (int i = 0; i < aRows; i++) {
-                    int thisRow[] = matrixA[i];
-                    int summand = 0;
-                    for (int k = 0; k < aColumns; k++) {
-                        summand += thisRow[k] * thatColumn[k];
-                    }
-                    matrixC[i][j] = summand;
-                }
+                calc(aColumns, aRows, thatColumn, j, matrixA, matrixC);
             }
         } catch (IndexOutOfBoundsException ignored) { }
         return matrixC;

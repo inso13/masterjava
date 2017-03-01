@@ -24,7 +24,7 @@ public class MainMatrix {
         while (count < 6) {
             System.out.println("Pass " + count);
             long start = System.currentTimeMillis();
-           final int[][] matrixC = MatrixUtil.singleThreadMultiplyUnoptimized(matrixA, matrixB);
+         //  final int[][] matrixC = MatrixUtil.singleThreadMultiplyUnoptimized(matrixA, matrixB);
             double duration = (System.currentTimeMillis() - start) / 1000.;
             out("Single thread time, sec: %.3f", duration);
             singleThreadSum += duration;
@@ -37,7 +37,6 @@ public class MainMatrix {
 
             start = System.currentTimeMillis();
             final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply(matrixA, matrixB, executor);
-
             duration = (System.currentTimeMillis() - start) / 1000.;
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
