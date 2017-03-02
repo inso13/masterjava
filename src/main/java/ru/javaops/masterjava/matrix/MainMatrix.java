@@ -1,5 +1,7 @@
 package ru.javaops.masterjava.matrix;
 
+import org.la4j.Matrix;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,10 +43,23 @@ public class MainMatrix {
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
 
+            Matrix A = Matrix.from2DArray(MatrixUtil.toDouble(matrixA));
+            Matrix B = Matrix.from2DArray(MatrixUtil.toDouble(matrixB));
+            start = System.currentTimeMillis();
+            final Matrix la4jMatrix = MatrixUtil.multiplyByla4j(A, B);
+            duration = (System.currentTimeMillis() - start) / 1000.;
+            out("la4j time, sec: %.3f", duration);
+            concurrentThreadSum += duration;
+
             if (!MatrixUtil.compare(optimizedMatrixC, concurrentMatrixC)) {
                 System.err.println("Comparison failed");
                 break;
             }
+            if (!MatrixUtil.compare(optimizedMatrixC, concurrentMatrixC)) {
+                System.err.println("Comparison failed");
+                break;
+            }
+
             count++;
         }
         executor.shutdown();

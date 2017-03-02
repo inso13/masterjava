@@ -1,5 +1,9 @@
 package ru.javaops.masterjava.matrix;
 
+import org.la4j.Matrix;
+import org.la4j.matrix.dense.Basic1DMatrix;
+import org.la4j.matrix.dense.Basic2DMatrix;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -99,6 +103,29 @@ public class MatrixUtil {
             }
         } catch (IndexOutOfBoundsException ignored) { }
         return matrixC;
+    }
+
+    protected static double[][] toDouble(int[][] matrixA)
+    {
+        double[][] matrixB = new double[matrixA.length][matrixA[0].length];
+        for (int i=0; i<matrixA.length; i++)
+        {for (int j=0; j<matrixA[0].length; j++)
+        { matrixB[i][j] = matrixA[i][j];}}
+        return matrixB;
+    }
+
+    private static int[][] toInt(double[][] matrixA)
+    {
+        int[][] matrixB = new int[matrixA.length][matrixA[0].length];
+        for (int i=0; i<matrixA.length; i++)
+        {for (int j=0; j<matrixA[0].length; j++)
+        { matrixB[i][j] = (int)matrixA[i][j];}}
+        return matrixB;
+    }
+
+    public static Matrix multiplyByla4j(Matrix a, Matrix b)
+    {
+        return a.multiply(b);
     }
 
     public static int[][] create(int size) {
