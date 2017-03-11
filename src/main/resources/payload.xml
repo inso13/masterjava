@@ -1,0 +1,35 @@
+<Payload xmlns="http://javaops.ru"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://javaops.ru payload.xsd">
+    <Users>
+        <User flag="active" city="kiv" email="gmail@gmail.com" groups="topjava09">
+            <fullName>Full Name</fullName>
+        </User>
+        <User flag="superuser" city="spb" email="admin@javaops.ru" groups="topjava10 topjava09 masterjava02">
+            <fullName>Admin</fullName>
+        </User>
+        <User flag="deleted" city="spb" email="mail@yandex.ru" groups="masterjava01">
+            <fullName>Deleted</fullName>
+        </User>
+    </Users>
+    <Cities>
+        <City id="spb">Санкт-Петербург</City>
+        <City id="kiv">Киев</City>
+        <City id="mnsk">Минск</City>
+    </Cities>
+
+    <Projects>
+        <Project>
+            <name>topjava</name>
+            <description>spring</description>
+            <groups groupType="REGISTERING" name="topjava10" id="topjava10"/>
+            <groups groupType="FINISHED" name="topjava09" id="topjava09"/>
+        </Project>
+        <Project>
+            <name>masterjava</name>
+            <description>multithreading</description>
+            <groups groupType="CURRENT" name="masterjava01" id="masterjava01"/>
+            <groups groupType="FINISHED" name="masterjava02" id="masterjava02"/>
+        </Project>
+    </Projects>
+</Payload>
