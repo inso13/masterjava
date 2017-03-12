@@ -141,6 +141,14 @@ public class Project {
         return this.groups;
     }
 
+    public void setGroups()
+    {
+        groups=new ArrayList<>();
+    }
+    public void addGroup (Project.Groups group)
+    {
+        groups.add(group);
+    }
 
     /**
      * <p>Java class for anonymous complex type.
@@ -249,4 +257,12 @@ public class Project {
 
     }
 
+    @Override
+    public String toString() {
+        return "Project{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", groups=" + groups +
+                '}';
+    }
 }

@@ -183,4 +183,24 @@ public class User {
         return this.groups;
     }
 
+    public void setGroups()
+    {
+        groups=new ArrayList<>();
+    }
+
+    public void addGroup(Object group)
+    {
+        groups.add(group);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", flag=" + flag +
+                ", city=" + city +
+                ", groups=" + groups +
+                '}';
+    }
 }
