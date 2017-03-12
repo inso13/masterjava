@@ -13,9 +13,7 @@ import javax.xml.bind.JAXBException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: gkislin
@@ -36,20 +34,21 @@ public class Main {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Payload payload = JAXB_PARSER.unmarshal(
                 Resources.getResource("payload.xml").openStream());
-        String strPayload = JAXB_PARSER.marshal(payload);
-        JAXB_PARSER.validate(strPayload);
         String str;
+
 
         while (!(str=reader.readLine()).equals("exit"))
         {
+            boolean found = false;
             List<Project> list = payload.getProjects().getProject();
             for (Project project:list)
             {
                 if (project.getName().equals(str))
                 {
+                    found=true;
                     List<User> users = payload.getUsers().getUser();
                     List<Project.Groups> groups = project.getGroups();
-                    List<User> projectUsers = new ArrayList<>();
+                    SortedSet<String> projectUsers = new TreeSet<>();
                     for (Project.Groups group:groups)
                     {for (User u:users)
                         {
@@ -58,17 +57,14 @@ public class Main {
                                 Project.Groups ugr = (Project.Groups)uGroup;
                                 if (ugr.getName().equals(group.getName()))
                                 {
-                                    projectUsers.add(u);
+                                    projectUsers.add(u.getFullName());
                                 }
                             }
                         }}
-
                     System.out.println(projectUsers);
-                    break;
                 }
-
             }
-            System.out.println("No such project");
+            if (!found)System.out.println("No such project");
         }
     }
 }
