@@ -2,7 +2,7 @@ package ru.javaops.masterjava.xml.util;
 
 import com.google.common.io.Resources;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 import org.w3c.dom.NodeList;
 
 import javax.xml.xpath.XPathConstants;
