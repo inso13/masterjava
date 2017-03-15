@@ -1,7 +1,8 @@
 package ru.javaops.masterjava.xml.util;
 
 import com.google.common.io.Resources;
-import org.junit.Test;
+
+import org.testng.annotations.Test;
 import ru.javaops.masterjava.xml.schema.CityType;
 import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.schema.Payload;

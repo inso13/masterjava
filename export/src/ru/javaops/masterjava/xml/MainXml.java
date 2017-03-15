@@ -1,4 +1,4 @@
-package ru.javaops.masterjava;
+package ru.javaops.masterjava.xml;
 
 import com.google.common.base.Splitter;
 import com.google.common.io.Resources;
