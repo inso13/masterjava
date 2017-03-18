@@ -1,0 +1,105 @@
+package ru.javaops.masterjava.xml.upload;
+
+/**
+ * Created by Inso on 18.03.2017.
+ */
+
+
+import com.google.common.base.Splitter;
+import com.google.common.io.Resources;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import ru.javaops.masterjava.xml.schema.User;
+import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.events.XMLEvent;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
+
+import static com.google.common.base.Strings.nullToEmpty;
+
+
+public class UploadServlet extends HttpServlet {
+    private static final Comparator<User> USER_COMPARATOR = Comparator.comparing(User::getValue).thenComparing(User::getEmail);
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendRedirect("upload.jsp");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+// Create a factory for disk-based file items
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+
+// Configure a repository (to ensure a secure temp location is used)
+        ServletContext servletContext = this.getServletConfig().getServletContext();
+        File repository = (File) servletContext.getAttribute("javax.servlet.context.tempdir");
+        factory.setRepository(repository);
+
+// Create a new file upload handler
+        ServletFileUpload upload = new ServletFileUpload(factory);
+
+// Parse the request
+        try {
+            List<FileItem> items = upload.parseRequest(req);
+            for (FileItem item:items)
+            {
+        //        URL payloadUrl = Resources.getResource(((DiskFileItem) item).getStoreLocation().getAbsolutePath());
+                try (InputStream is = item.getInputStream())
+
+               // InputStream is = payloadUrl.openStream())
+                     {
+                    StaxStreamProcessor processor = new StaxStreamProcessor(is);
+                    final Set<String> groupNames = new HashSet<>();
+                    String projectName = "masterjava";
+                    // Projects loop
+                    projects:
+                    while (processor.doUntil(XMLEvent.START_ELEMENT, "Project")) {
+                        if (projectName.equals(processor.getAttribute("name"))) {
+                            // Groups loop
+                            String element;
+                            while ((element = processor.doUntilAny(XMLEvent.START_ELEMENT, "Project", "Group", "Users")) != null) {
+                                if (!element.equals("Group")) {
+                                    break projects;
+                                }
+                                groupNames.add(processor.getAttribute("name"));
+                            }
+                        }
+                    }
+                    if (groupNames.isEmpty()) {
+                        throw new IllegalArgumentException("Invalid " + projectName + " or no groups");
+                    }
+
+                    // Users loop
+                    Set<User> users = new TreeSet<>(USER_COMPARATOR);
+
+                    while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
+                        String groupRefs = processor.getAttribute("groupRefs");
+                        if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
+                            User user = new User();
+                            user.setEmail(processor.getAttribute("email"));
+                            user.setValue(processor.getText());
+                            users.add(user);
+                        }
+                    }
+                System.out.println(users);
+                         resp.sendRedirect("upload.jsp");
+                    return;
+            }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
