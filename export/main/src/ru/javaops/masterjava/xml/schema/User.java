@@ -175,8 +175,9 @@ public class User {
 
     @Override
     public String toString() {
-        return value + '(' + email + ')';
+        return 
+                "name = " + value  +
+                ", email = " + email +
+                ", flag = " + flag;
     }
-
-
 }

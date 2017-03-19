@@ -6,12 +6,12 @@
     <display-name>File upload</display-name>
 
    <servlet>
-        <servlet-name>upload</servlet-name>
+        <servlet-name>uploadServlet</servlet-name>
         <servlet-class>ru.javaops.masterjava.xml.upload.UploadServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>upload</servlet-name>
+        <servlet-name>uploadServlet</servlet-name>
         <url-pattern>/upload</url-pattern>
     </servlet-mapping>
 </web-app>

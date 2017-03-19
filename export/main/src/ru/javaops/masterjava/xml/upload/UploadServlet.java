@@ -12,6 +12,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import ru.javaops.masterjava.xml.schema.FlagType;
 import ru.javaops.masterjava.xml.schema.User;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
 
@@ -55,46 +56,23 @@ public class UploadServlet extends HttpServlet {
             List<FileItem> items = upload.parseRequest(req);
             for (FileItem item:items)
             {
-        //        URL payloadUrl = Resources.getResource(((DiskFileItem) item).getStoreLocation().getAbsolutePath());
                 try (InputStream is = item.getInputStream())
-
-               // InputStream is = payloadUrl.openStream())
                      {
                     StaxStreamProcessor processor = new StaxStreamProcessor(is);
-                    final Set<String> groupNames = new HashSet<>();
-                    String projectName = "masterjava";
-                    // Projects loop
-                    projects:
-                    while (processor.doUntil(XMLEvent.START_ELEMENT, "Project")) {
-                        if (projectName.equals(processor.getAttribute("name"))) {
-                            // Groups loop
-                            String element;
-                            while ((element = processor.doUntilAny(XMLEvent.START_ELEMENT, "Project", "Group", "Users")) != null) {
-                                if (!element.equals("Group")) {
-                                    break projects;
-                                }
-                                groupNames.add(processor.getAttribute("name"));
-                            }
-                        }
-                    }
-                    if (groupNames.isEmpty()) {
-                        throw new IllegalArgumentException("Invalid " + projectName + " or no groups");
-                    }
 
-                    // Users loop
                     Set<User> users = new TreeSet<>(USER_COMPARATOR);
 
                     while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
-                        String groupRefs = processor.getAttribute("groupRefs");
-                        if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
                             User user = new User();
                             user.setEmail(processor.getAttribute("email"));
+                            user.setFlag(FlagType.fromValue(processor.getAttribute("flag")));
                             user.setValue(processor.getText());
                             users.add(user);
-                        }
                     }
-                System.out.println(users);
-                         resp.sendRedirect("upload.jsp");
+                    for (User u:users)
+                    { System.out.println(u);}
+                    req.setAttribute("users", users);
+                    req.getRequestDispatcher("userlist.jsp").forward(req, resp);
                     return;
             }
             }
